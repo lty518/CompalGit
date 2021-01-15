@@ -43,7 +43,7 @@ if __name__ == '__main__':
 with open(filename_vrmonitor,'r', encoding='utf-8') as f:
     lines = f.readlines()
 for line in lines:
-    global last_log_timeinfo
+    
     line = line.split(' - ', 1)
     last_log_timeinfo = line[0]
     textinfo = line[1]

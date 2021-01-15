@@ -11,9 +11,13 @@ from flask import Flask, request
 import time
 from threading import Timer
 import subprocess
+import socket
+import get_local_IP
+import yaml
+from os import path
 #-----------------------------
-from CheckInstalledGame import CheckInstalledGame
-from ConnectionManager import SendGameConnection
+from check_installed_game import CheckInstalledGame
+from connection_manager import SendGameConnection
 app = Flask(__name__)
 
 #GAME_ID
@@ -37,19 +41,26 @@ BACKEND_SERVER_IP = '172.16.0.189'
 is_available = 1
 game_title = ''
 player_ip = ''
+
 #GlOBAL VARIABLES
 launch_time = time.time()
 g_CurrentGameID = ''
+
 # Register to manager
-def RegisterToBackednServer():
+def RegisterToBackednServer(backend_ip):
+    if os.path.isfile('local_ip.txt') == False:
+        getLocalIP()
+    f = open("local_ip.txt",'r')
+    local_ip = f.read()
+    data = {'edge_ip': local_ip}
     try:
-        r = post('http://{0}:5000//register'.format(BACKEND_SERVER_IP))
+        r = post('http://{0}:5000//register'.format(backend_ip), data= data)
         print ("register_to_backend_server" + r.text)
     except exceptions.RequestException as e:
         raise SystemExit(e)
 
 def UnregisterToBackednServer():
-    res = get('http://{0}:5000/deregister'.format(BACKEND_SERVER_IP))
+    res = get('http://{0}:5000/deregister'.format(backend_ip))
     print(res.text)
 
 def CheckGameStatus(imagename):
@@ -149,8 +160,13 @@ def main():
     # program start
     # check installed steamvr games in pc
     list = CheckInstalledGame()
+    global BACKEND_SERVER_IP
+    # with open("Settings.yaml",'r') as stream:
+    #
+    # with open("system_settings.yaml", 'r') as stream:
+    #     settings = yaml.load(stream)
     # register to backed server
-    RegisterToBackednServer()
+    RegisterToBackednServer(BACKEND_SERVER_IP)
     #if steamVR not open
     if CheckGameStatus(SteamVR) == 0:
         print ("SteamVR is not running, open now!")

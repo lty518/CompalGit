@@ -1,0 +1,4 @@
+# system_settings.yaml file
+CLOUDXR_SERVER_MANAGER_IP : 172.16.0.189 #Acer notebook
+CLOUDXR_CLIENT_IP : 172.16.0.213 #Oculus Quest
+BACKEND_SERVER_IP : 172.16.0.189

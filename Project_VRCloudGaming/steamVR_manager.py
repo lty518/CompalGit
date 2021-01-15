@@ -17,11 +17,23 @@ if openvr.isRuntimeInstalled():
 # VRApplication_Utility : IVRSettings and IVRApplications are guaranteed to work
 result = openvr.checkInitError(openvr.VRApplication_Background)
 print(result , " ", openvr.getVRInitErrorAsSymbol(result))
+if result == 0:
+    state = 10100
+#-------------------------------------------------------------
+#Developing part
+
 vr_app = openvr.IVRApplications()
-print("vr_app : " ,vr_app.getApplicationProcessId(ctypes.c_char_p("410570")))
+#ctypes.c_char_p("410570")
+print("vr_app getApplicationState: ", vr_app.getApplicationState())
+print("vr_app getTransitionState: ", vr_app.getApplicationsTransitionStateNameFromEnum(vr_app.getTransitionState()))
+print("vr_app : " ,vr_app.getApplicationProcessId('SteamVR.exe'.encode("utf-8")))
 # vr_settings = openvr.VRSettings()
 if result == 0:
     vr_sys = openvr.VRSystem()
+    print("CloudXR_Server_State ", vr_sys.getInt32TrackedDeviceProperty(openvr.k_unTrackedDeviceIndex_Hmd, 10100))
+    print("isDisplayOnDesktop ", vr_sys.isDisplayOnDesktop())
+    print("isTrackedDeviceConnected ", vr_sys.isTrackedDeviceConnected(openvr.k_unTrackedDeviceIndex_Hmd))
+    # print("getPropErrorNameFromEnum ", vr_sys.getPropErrorNameFromEnum(result))
     driver = vr_sys.getStringTrackedDeviceProperty(
                 openvr.k_unTrackedDeviceIndex_Hmd,
                 openvr.Prop_TrackingSystemName_String,
@@ -30,8 +42,7 @@ if result == 0:
                 openvr.k_unTrackedDeviceIndex_Hmd,
                 openvr.Prop_SerialNumber_String,
             )
-    print(driver)
-    print(display)
+    print(driver, display)
 
 # print("2")
 # print(openvr.getRuntimePath())
