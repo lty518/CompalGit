@@ -57,7 +57,7 @@ def index(text):
 @app.route('/game-connection', methods=['POST', 'GET'])
 def launchCloudXR():
     if request.method == 'POST':
-        print('launchCloudXR=============')
+        print('============launchCloudXR=============')
         global player_ip, is_available, game_title
         global game_id
         global BACKEND_SERVER_IP
@@ -70,16 +70,18 @@ def launchCloudXR():
 
         svrm.setGameID(game_id)
         svrm.setGameTitle(game_title)
-        logging.info("request: {0} {1} {2}".format(game_title,  game_id, player_ip))
-        print("request: ", game_title, game_id, player_ip)
+        # logging.info("request: {0} {1} {2}".format(game_title,  game_id, player_ip))
+        print("======request: ", game_title, game_id, player_ip)
         # Game_id needs to be generalized
         if svrm.CheckGameStatus(SteamVR) >= 1:
             is_available = 0
             print('Available: ', is_available)
-            svrm.startGame(BACKEND_SERVER_IP,player_ip, game_id)
+            svrm.startGame(BACKEND_SERVER_IP,player_ip, game_id, game_title)
             # bm.SendGameConnection(BACKEND_SERVER_IP,player_ip, game_id, "playing")
             return {'launch success': True}
         else:
+            # TODO: open steamvr again and startGame
+            # TODO: return false if error happen
             return {'launch success': False}
     # for launching steamVR process
     else:
@@ -165,11 +167,13 @@ def main():
     # send status to backed server
     # loop
 
-main()
+
 
 if __name__ == '__main__':
     #set host='0.0.0.0', port=80 to enable external access in local network
     # app.debug = True
     # app.use_reloader=False
+    main()
     app.run(host='0.0.0.0', port=8080)
+
 # , use_reloader=False

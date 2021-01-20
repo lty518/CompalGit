@@ -1,3 +1,4 @@
+import asyncio
 import ctypes
 import os
 import openvr
@@ -7,7 +8,6 @@ import multiprocess as mp
 import time
 import threading
 import logging
-
 from enum import Enum
 import backendManager as bm
 #COMMAND
@@ -15,6 +15,7 @@ COMMAND_LAUNCH = 'start steam://rungameid/{0}'
 COMMAND_CLOSE = 'taskkill /FI "WINDOWTITLE eq "{0}"'
 g_CurrentGameTitle =''
 logging.basicConfig(level=logging.DEBUG)
+loop = asyncio.get_event_loop()
 class ServerState(Enum):
     #Initial state
     ServerState_NotRunning = 0
@@ -40,6 +41,7 @@ def openGame(dict):
     BACKEND_SERVER_IP  = dict['BACKEND_SERVER_IP']
     player_ip = dict['player_ip']
     game_id = dict['game_id']
+    game_title = dict['game_title']
     timeout = 120
     period = 3
     time_count = 0
@@ -48,27 +50,42 @@ def openGame(dict):
     while time.time() < mustend:
         if checkSteamVRInit() == 0:
             os.system(COMMAND_LAUNCH.format(game_id))
+            while CheckGameStatus(game_title) == 0 :
+                continue
             isGameOpened = True
+            print("start game success!")
             break
         else:
             time_count += period
-            logging.info("wait for connecting: ", time_count, ' seconds')
+            # logging.info("wait for connecting: ", time_count, ' seconds')
+            print("wait for connecting : ", time_count)
             time.sleep(period)
     if isGameOpened == True:
+        print("playing")
         bm.SendGameConnection(BACKEND_SERVER_IP,player_ip, game_id, "playing")
     else:
+        print("timeout")
         bm.SendGameConnection(BACKEND_SERVER_IP,player_ip, game_id, "timeout")
     return True
 
 def startSteamvr(game_id):
     os.system(COMMAND_LAUNCH.format(game_id))
 
-def startGame(BACKEND_SERVER_IP,player_ip, game_id):
+def startGame(BACKEND_SERVER_IP,player_ip, game_id, game_title):
+    print("=========startGame1===========")
     dict = {'BACKEND_SERVER_IP' : BACKEND_SERVER_IP, 'player_ip': player_ip,
-    'game_id': game_id}
+    'game_id': game_id, 'game_title' : game_title}
     p = mp.Process(target = openGame, args=(dict,))
     p.start()
-    p.join()
+    print("=========startGame2===========")
+    # p.join()
+
+def start_game_asyncio(BACKEND_SERVER_IP,player_ip, game_id):
+    dict = {'BACKEND_SERVER_IP' : BACKEND_SERVER_IP, 'player_ip': player_ip,
+    'game_id': game_id}
+
+
+
 def closeGame(game_title):
     os.system(COMMAND_CLOSE.format(game_title))
 

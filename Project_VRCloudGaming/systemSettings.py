@@ -31,7 +31,8 @@ def set(name, value):
 
 def loadConfig():
     print("=====loadSystemSettings=====")
-    print("os.getcwd() :"os.getcwd())
+    print("os.getcwd() :",os.getcwd())
+    # with open(os.getcwd()+'\system_settings.yaml', 'r') as stream:
     with open(os.getcwd()+'\Project_VRCloudGaming\system_settings.yaml', 'r') as stream:
         data = yaml.load(stream, Loader=yaml.FullLoader)
     # print(yaml.dump(data))

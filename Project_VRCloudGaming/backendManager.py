@@ -35,8 +35,8 @@ def SendGameConnection(BACKEND_SERVER_IP,client_ip, game_id, connection_status):
     # r = requests.post('http://172.16.0.189:5000/connection-status', data=data)
     # r = requests.get('http://127.0.0.1:8080/', params = my_data)
     # And done.
-    print(r.url)
-    print(r.text)  # displays the result body.
+    print('r.url :' , r.url)
+    print('r.text : ', r.text)  # displays the result body.
 
 """ Uncomment below to debug"""
 # SendGameConnection("172.16.0.189","123","456","0")
