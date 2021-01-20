@@ -170,5 +170,6 @@ main()
 if __name__ == '__main__':
     #set host='0.0.0.0', port=80 to enable external access in local network
     # app.debug = True
+    # app.use_reloader=False
     app.run(host='0.0.0.0', port=8080)
 # , use_reloader=False
