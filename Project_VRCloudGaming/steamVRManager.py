@@ -12,7 +12,8 @@ from enum import Enum
 import backendManager as bm
 #COMMAND
 COMMAND_LAUNCH = 'start steam://rungameid/{0}'
-COMMAND_CLOSE = 'taskkill /FI "WINDOWTITLE eq "{0}"'
+# COMMAND_CLOSE = 'taskkill /FI "WINDOWTITLE eq "{0}"'
+COMMAND_CLOSE = 'taskkill /F /FI "IMAGENAME eq {0}*"'
 g_CurrentGameTitle =''
 logging.basicConfig(level=logging.DEBUG)
 loop = asyncio.get_event_loop()
@@ -34,8 +35,11 @@ class ServerState(Enum):
 
 def CheckGameStatus(imagename):
     imagename = imagename +".exe"
+    # p = os.popen('tasklist /FI "IMAGENAME eq %s"' % imagename)
+    # return p.read().count(imagename)
     p = os.popen('tasklist /FI "IMAGENAME eq %s"' % imagename)
-    return p.read().count(imagename)
+    pp = p.read().title()
+    return pp.count(imagename.title())
 
 def openGame(dict):
     BACKEND_SERVER_IP  = dict['BACKEND_SERVER_IP']
