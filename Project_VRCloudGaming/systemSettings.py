@@ -1,7 +1,7 @@
 import os
 import yaml
 
-
+dir_path = os.path.dirname(os.path.realpath(__file__))
 def write(new_yaml_data_dict):
 
     if not os.path.isfile("gamedict.yaml"):
@@ -23,17 +23,17 @@ def AppendDict(game_id, game_title):
     write(d)
 
 def set(name, value):
-    with open(os.getcwd()+'\Project_VRCloudGaming\system_settings.yaml',encoding="utf-8") as stream:
+    with open(dir_path+'\system_settings.yaml',encoding="utf-8") as stream:
         data = yaml.load(stream, Loader=yaml.FullLoader)
     data[name] = value
-    with open(os.getcwd()+'\Project_VRCloudGaming\system_settings.yaml','w',encoding="utf-8") as stream:
+    with open(dir_path+'\system_settings.yaml','w',encoding="utf-8") as stream:
         yaml.dump(data, stream)
 
 def loadConfig():
     print("=====loadSystemSettings=====")
     print("os.getcwd() :",os.getcwd())
     # with open(os.getcwd()+'\system_settings.yaml', 'r') as stream:
-    with open(os.getcwd()+'\Project_VRCloudGaming\system_settings.yaml', 'r') as stream:
+    with open(dir_path+'\system_settings.yaml', 'r') as stream:
         data = yaml.load(stream, Loader=yaml.FullLoader)
     # print(yaml.dump(data))
     print("CLOUDXR_SERVER_MANAGER_IP", data['CLOUDXR_SERVER_MANAGER_IP'])
