@@ -8,15 +8,18 @@ import multiprocess as mp
 import time
 import threading
 import logging
+import win32gui
 from enum import Enum
 import backendManager as bm
+#
+print('openvr path: ',openvr.__path__)
 #COMMAND
 COMMAND_LAUNCH = 'start steam://rungameid/{0}'
-# COMMAND_CLOSE = 'taskkill /FI "WINDOWTITLE eq "{0}"'
 COMMAND_CLOSE = 'taskkill /F /FI "IMAGENAME eq {0}*"'
 g_CurrentGameTitle =''
 logging.basicConfig(level=logging.DEBUG)
 loop = asyncio.get_event_loop()
+
 class ServerState(Enum):
     #Initial state
     ServerState_NotRunning = 0
@@ -32,6 +35,12 @@ class ServerState(Enum):
     ServerState_Disconnected = 5
     #Server in an error state.
     ServerState_Error = 6
+
+def enumHandler(hwnd, lParam):
+    if win32gui.IsWindowVisible(hwnd):
+        if lParam in win32gui.GetWindowText(hwnd):
+            # win32gui.MoveWindow(hwnd, 0, 0, 760, 500, True)
+            win32gui.SetForegroundWindow(hwnd)
 
 def CheckGameStatus(imagename):
     imagename = imagename +".exe"
@@ -52,11 +61,13 @@ def openGame(dict):
     mustend = time.time() + timeout
     isGameOpened = False
     while time.time() < mustend:
-        if checkSteamVRInit() == 0:
+        if checkSteamVRInit() == 0: #CloudXR Connect Success
             os.system(COMMAND_LAUNCH.format(game_id))
             while CheckGameStatus(game_title) == 0 :
                 continue
             isGameOpened = True
+            #move the game application to foreground
+            # win32gui.EnumWindows(enumHandler,game_title)
             print("start game success!")
             break
         else:
@@ -79,8 +90,10 @@ def startGame(BACKEND_SERVER_IP,player_ip, game_id, game_title):
     print("=========startGame1===========")
     dict = {'BACKEND_SERVER_IP' : BACKEND_SERVER_IP, 'player_ip': player_ip,
     'game_id': game_id, 'game_title' : game_title}
+    global p
     p = mp.Process(target = openGame, args=(dict,))
     p.start()
+    # p.join()
     print("=========startGame2===========")
     # p.join()
 
@@ -88,7 +101,11 @@ def start_game_asyncio(BACKEND_SERVER_IP,player_ip, game_id):
     dict = {'BACKEND_SERVER_IP' : BACKEND_SERVER_IP, 'player_ip': player_ip,
     'game_id': game_id}
 
-
+def timeoutOpenGame():
+    global p
+    if p.is_alve():
+        p.terminate()
+        bm.SendGameConnection(BACKEND_SERVER_IP,player_ip, game_id, "timeout")
 
 def closeGame(game_title):
     os.system(COMMAND_CLOSE.format(game_title))

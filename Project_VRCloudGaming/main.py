@@ -3,23 +3,21 @@ import sys
 import os
 import threading
 import time
-import subprocess
 import glob
 import atexit
 from requests import get, post, exceptions
 from flask import Flask, request
 import time
 from threading import Timer
-import subprocess
 import socket
 from os import path
 import logging
-import openvr
 #-----------------------------
 from checkInstalledGame import CheckInstalledGame
 import backendManager as bm
 import systemSettings as sys
 import steamVRManager as svrm
+import udp_client_listener as ucl
 app = Flask(__name__)
 logging.basicConfig(level=logging.DEBUG)
 #GAME_ID
@@ -35,7 +33,7 @@ CLOUDXR_SERVER_MANAGER_IP = ''
 CLOUDXR_CLIENT_IP = ''
 BACKEND_SERVER_IP = ''
 #FLAG
-is_available = 1
+is_available = True
 game_id =''
 game_title = ''
 player_ip = ''
@@ -52,6 +50,14 @@ def hello():
 def index(text):
     print(text)
     return "<h1>%s</h1>" % text
+
+@app.route('/connection-timeout', methods=['GET'])
+def timeoutCloudXR():
+    svrm.timeoutOpenGame()
+    global is_available
+    is_available = True
+    print("timeoutCloudXR")
+
 
 #check if steamvr is ok and return ready for a user to connect
 @app.route('/game-connection', methods=['POST', 'GET'])
@@ -71,12 +77,11 @@ def launchCloudXR():
         svrm.setGameID(game_id)
         svrm.setGameTitle(game_title)
         # logging.info("request: {0} {1} {2}".format(game_title,  game_id, player_ip))
-        print("======request: ", game_title, game_id, player_ip)
         # Game_id needs to be generalized
         if svrm.CheckGameStatus(SteamVR) >= 1:
-            is_available = 0
-            print('Available: ', is_available)
-            svrm.startGame(BACKEND_SERVER_IP,player_ip, game_id, game_title)
+            if is_available == True:
+                svrm.startGame(BACKEND_SERVER_IP,player_ip, game_id, game_title)
+            is_available = False
             # bm.SendGameConnection(BACKEND_SERVER_IP,player_ip, game_id, "playing")
             return {'launch success': True}
         else:
@@ -105,7 +110,7 @@ def closeCloudXR():
     #     return {'close fail': False, 'game_title' : game_title}
     if svrm.CheckGameStatus(svrm.getGameTitle()) >= 1:
         svrm.closeGame(svrm.getGameTitle())
-        is_available = 1
+        is_available = True
         print(player_ip, is_available)
         bm.SendGameConnection(BACKEND_SERVER_IP,player_ip, game_id, "closed")
         svrm.setGameID('')
@@ -146,11 +151,19 @@ def main():
     list = CheckInstalledGame()
     #if list is empty
     # return
+    # ucl.start_udp_server()
+
+
     settings = sys.loadConfig()
     #if sys not true return error
     BACKEND_SERVER_IP = settings['BACKEND_SERVER_IP']
     # register to backed server
-    bm.RegisterToBackednServer(BACKEND_SERVER_IP, list)
+    bm.RegisterToBackendServer(BACKEND_SERVER_IP, list)
+    #if fail to RegisterToBackednServer
+
+    #then throw exceptions
+
+
     #if steamVR not open
     if svrm.CheckGameStatus(SteamVR) == 0:
         print ("SteamVR is not running, open now!")
@@ -160,7 +173,8 @@ def main():
     else:
         print("SteamVR is running!")
 
-    atexit.register(bm.UnregisterToBackednServer, BACKEND_SERVER_IP)
+    atexit.register(bm.UnregisterToBackendServer, BACKEND_SERVER_IP)
+    # atexit.register(ucl.stop_udp_server)
     # create a while-while to listen to steamvr messages
     # CheckSteamVRLogs
     # if logs updated
@@ -175,5 +189,3 @@ if __name__ == '__main__':
     # app.use_reloader=False
     main()
     app.run(host='0.0.0.0', port=8080)
-
-# , use_reloader=False
