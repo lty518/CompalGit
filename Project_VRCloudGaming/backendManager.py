@@ -8,7 +8,7 @@ from requests import get, post, exceptions
 local_ip =''
 # logging.basicConfig(level=logging.DEBUG)
 # Register to manager
-def RegisterToBackednServer(backend_ip, installedGameList):
+def RegisterToBackendServer(backend_ip, installedGameList):
     global local_ip
     local_ip = socket.gethostbyname(socket.gethostname())
     # sys.set('LOCAL_IP',local_ip)
@@ -20,7 +20,7 @@ def RegisterToBackednServer(backend_ip, installedGameList):
     except exceptions.RequestException as e:
         raise SystemExit(e)
 
-def UnregisterToBackednServer(backend_ip):
+def UnregisterToBackendServer(backend_ip):
     print("UnregisterToBackednServer : ", backend_ip)
     res = get('http://{0}//deregister'.format(backend_ip))
     print(res.text)
