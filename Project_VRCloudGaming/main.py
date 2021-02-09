@@ -14,6 +14,7 @@ from os import path
 import logging
 #-----------------------------
 from checkInstalledGame import CheckInstalledGame
+import check_if_port_open
 import backendManager as bm
 import systemSettings as sys
 import steamVRManager as svrm
@@ -41,7 +42,7 @@ list = ''
 #GlOBAL VARIABLES
 launch_time = time.time()
 g_CurrentGameID = ''
-
+settings =''
 @app.route('/')
 def hello():
     return "<h1>Hello World!</h1>"
@@ -146,14 +147,14 @@ def reconnect_to_backend_server():
     return {'game_id Status': True}
 
 def main():
-    global BACKEND_SERVER_IP, list
+    global BACKEND_SERVER_IP
+    global list
+    global settings
     # check installed steamvr games in pc
     list = CheckInstalledGame()
     #if list is empty
     # return
     # ucl.start_udp_server()
-
-
     settings = sys.loadConfig()
     #if sys not true return error
     BACKEND_SERVER_IP = settings['BACKEND_SERVER_IP']
@@ -188,4 +189,6 @@ if __name__ == '__main__':
     # app.debug = True
     # app.use_reloader=False
     main()
-    app.run(host='0.0.0.0', port=8080)
+    check_port = check_if_port_open.check(settings['GAMESERVER_IP'],settings['GAMESERVER_PORT'])
+    print(check_port)
+    app.run(host=settings['GAMESERVER_IP'], port=settings['GAMESERVER_PORT'])

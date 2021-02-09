@@ -39,6 +39,8 @@ def loadConfig():
     print("CLOUDXR_SERVER_MANAGER_IP", data['CLOUDXR_SERVER_MANAGER_IP'])
     print("CLOUDXR_CLIENT_IP", data['CLOUDXR_CLIENT_IP'])
     print("BACKEND_SERVER_IP", data['BACKEND_SERVER_IP'])
+    print("GAMESERVER_IP", data['GAMESERVER_IP'])
+    print("GAMESERVER_PORT", data['GAMESERVER_PORT'])
     print("============================")
     return data
 
