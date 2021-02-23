@@ -4,7 +4,8 @@ import os
 import openvr
 import sys
 import subprocess
-import multiprocess as mp
+# import multiprocess as mp
+from multiprocessing import Process
 import time
 import threading
 import logging
@@ -91,21 +92,22 @@ def startGame(BACKEND_SERVER_IP,player_ip, game_id, game_title):
     dict = {'BACKEND_SERVER_IP' : BACKEND_SERVER_IP, 'player_ip': player_ip,
     'game_id': game_id, 'game_title' : game_title}
     global p
-    p = mp.Process(target = openGame, args=(dict,))
+    p = Process(target = openGame, args=(dict,))
     p.start()
     # p.join()
     print("=========startGame2===========")
     # p.join()
 
 def start_game_asyncio(BACKEND_SERVER_IP,player_ip, game_id):
-    dict = {'BACKEND_SERVER_IP' : BACKEND_SERVER_IP, 'player_ip': player_ip,
-    'game_id': game_id}
+    # dict = {'BACKEND_SERVER_IP' : BACKEND_SERVER_IP, 'player_ip': player_ip,
+    # 'game_id': game_id}
+    print("start_game_asyncio")
 
-def timeoutOpenGame():
+def timeoutOpenGame(BACKEND_SERVER_IP):
     global p
-    if p.is_alve():
+    if p.is_alive():
         p.terminate()
-        bm.SendGameConnection(BACKEND_SERVER_IP,player_ip, game_id, "timeout")
+        bm.SendGameTimeout(BACKEND_SERVER_IP)
 
 def closeGame(game_title):
     os.system(COMMAND_CLOSE.format(game_title))

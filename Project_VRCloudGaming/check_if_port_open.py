@@ -1,15 +1,18 @@
 import socket
 
+
 def check(IP, Port):
     a_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     location = (IP, Port)
     result_of_check = a_socket.connect_ex(location)
-
-    if result_of_check == 0:
-       print("Address: ", IP, ":", Port, "is open")
-    else:
-       print("Address: ", IP, ":", Port, "is not open")
     a_socket.close()
+    if result_of_check == 0:
+        print("Address: ", IP, ":", Port, "is in use")
+        return "Address: " + IP + ":" + Port + "is in use"
+    else:
+        print("Address: ", IP, ":", Port, "is not in use")
+        return "Address: " + IP + ":" + Port + "is not in use"
+
 
 def tryPort(port):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -23,4 +26,4 @@ def tryPort(port):
     sock.close()
     return result
 
-tryPort(5037)
+# tryPort(5037)
