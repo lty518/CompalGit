@@ -22,5 +22,11 @@ def GameConnection():
     print(dict)
     return 'GameConnection POST Received!'
 
+@app.route('/heartbeat', methods=['POST'])
+def heartbeat():
+    dict = request.form
+    print(dict)
+    return '123'
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
