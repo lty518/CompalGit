@@ -18,7 +18,7 @@ def RegisterToBackendServer(backend_ip, installedGameList):
     global local_ip
     local_ip = socket.gethostbyname(socket.gethostname())
     # sys.set('LOCAL_IP',local_ip)
-    data = {'edge_ip': local_ip, 'games': installedGameList}
+    data = {'edge_ip': local_ip, 'apps': installedGameList}
     try:
         r = post('http://{0}//register'.format(backend_ip), data=data)
         logging.info("register_to_backend_server" + r.text)
@@ -46,9 +46,9 @@ def SendGameTimeout(BACKEND_SERVER_IP):
     print('r.text : ', r.text)  # displays the result body.
 
 
-def SendGameConnection(BACKEND_SERVER_IP, client_ip, game_id, connection_status):
-    data = {'client_ip': client_ip, 'game_id': game_id,
-            'connection_status': connection_status}
+def SendGameConnection(BACKEND_SERVER_IP, client_ip, app_id, connection_status,platform):
+    data = {'client_ip': client_ip, 'app_id': app_id,
+            'connection_status': connection_status, 'platform': platform}
 
     server_ip = BACKEND_SERVER_IP
     url = 'http://' + server_ip + '/connection-status'

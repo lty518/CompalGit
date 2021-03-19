@@ -10,6 +10,7 @@ import time
 import threading
 import logging
 import win32gui
+import json
 from enum import Enum
 import backendManager as bm
 #
@@ -17,7 +18,7 @@ print('openvr path: ',openvr.__path__)
 #COMMAND
 COMMAND_LAUNCH = 'start steam://rungameid/{0}'
 COMMAND_CLOSE = 'taskkill /F /FI "IMAGENAME eq {0}*"'
-g_CurrentGameTitle =''
+g_CurrentAppTitle =''
 logging.basicConfig(level=logging.DEBUG)
 loop = asyncio.get_event_loop()
 
@@ -54,8 +55,9 @@ def CheckGameStatus(imagename):
 def openGame(dict):
     BACKEND_SERVER_IP  = dict['BACKEND_SERVER_IP']
     player_ip = dict['player_ip']
-    game_id = dict['game_id']
-    game_title = dict['game_title']
+    app_id = dict['app_id']
+    app_title = dict['app_title']
+    platform = dict['platform']
     timeout = 120
     period = 3
     time_count = 0
@@ -63,12 +65,15 @@ def openGame(dict):
     isGameOpened = False
     while time.time() < mustend:
         if checkSteamVRInit() == 0: #CloudXR Connect Success
-            os.system(COMMAND_LAUNCH.format(game_id))
-            while CheckGameStatus(game_title) == 0 :
+            if platform == 'steam':
+                os.system(COMMAND_LAUNCH.format(app_id))
+            elif platform == 'compal':
+                startApplication(app_title, app_id)
+            while CheckGameStatus(app_title) == 0 :
                 continue
             isGameOpened = True
             #move the game application to foreground
-            # win32gui.EnumWindows(enumHandler,game_title)
+            # win32gui.EnumWindows(enumHandler,app_title)
             print("start game success!")
             break
         else:
@@ -78,19 +83,19 @@ def openGame(dict):
             time.sleep(period)
     if isGameOpened == True:
         print("playing")
-        bm.SendGameConnection(BACKEND_SERVER_IP,player_ip, game_id, "playing")
+        bm.SendGameConnection(BACKEND_SERVER_IP,player_ip, app_id, "playing",platform)
     else:
         print("timeout")
-        bm.SendGameConnection(BACKEND_SERVER_IP,player_ip, game_id, "timeout")
+        bm.SendGameConnection(BACKEND_SERVER_IP,player_ip, app_id, "timeout",platform)
     return True
 
-def startSteamvr(game_id):
-    os.system(COMMAND_LAUNCH.format(game_id))
+def startSteamvr(app_id):
+    os.system(COMMAND_LAUNCH.format(app_id))
 
-def startGame(BACKEND_SERVER_IP,player_ip, game_id, game_title):
+def startGame(BACKEND_SERVER_IP,player_ip, app_id, app_title, platform):
     print("=========startGame1===========")
     dict = {'BACKEND_SERVER_IP' : BACKEND_SERVER_IP, 'player_ip': player_ip,
-    'game_id': game_id, 'game_title' : game_title}
+    'app_id': app_id, 'app_title' : app_title, 'platform' : platform}
     global p
     p = Process(target = openGame, args=(dict,))
     p.start()
@@ -98,9 +103,17 @@ def startGame(BACKEND_SERVER_IP,player_ip, game_id, game_title):
     print("=========startGame2===========")
     # p.join()
 
-def start_game_asyncio(BACKEND_SERVER_IP,player_ip, game_id):
+def startApplication(app_title, app_id):
+    with open('Project_VRCloudGaming/appdict.json') as f:
+        data = json.load(f)
+    for json_dict in data:
+        if app_id == json_dict['ID']:
+            os.startfile(json_dict['Address'])
+            print(json_dict['Address'])
+
+def start_game_asyncio(BACKEND_SERVER_IP,player_ip, app_id):
     # dict = {'BACKEND_SERVER_IP' : BACKEND_SERVER_IP, 'player_ip': player_ip,
-    # 'game_id': game_id}
+    # 'app_id': app_id}
     print("start_game_asyncio")
 
 def timeoutOpenGame(BACKEND_SERVER_IP):
@@ -109,22 +122,22 @@ def timeoutOpenGame(BACKEND_SERVER_IP):
         p.terminate()
         bm.SendGameTimeout(BACKEND_SERVER_IP)
 
-def closeGame(game_title):
-    os.system(COMMAND_CLOSE.format(game_title))
+def closeGame(app_title):
+    os.system(COMMAND_CLOSE.format(app_title))
 
-def setGameID(game_id):
-    global g_CurrentGameID
-    g_CurrentGameID = game_id
+def setAppID(app_id):
+    global g_CurrentAppID
+    g_CurrentAppID = app_id
 
-def getGameID():
-    return g_CurrentGameID
+def getAppID():
+    return g_CurrentAppID
 
-def setGameTitle(game_title):
-    global g_CurrentGameTitle
-    g_CurrentGameTitle = game_title
+def setAppTitle(app_title):
+    global g_CurrentAppTitle
+    g_CurrentAppTitle = app_title
 
-def getGameTitle():
-    return g_CurrentGameTitle
+def getAppTitle():
+    return g_CurrentAppTitle
 
 def checkSteamVRInit():
     result = openvr.checkInitError(openvr.VRApplication_Background)
@@ -179,4 +192,5 @@ def printSteamVRInfo():
     #     print(xform)
     #     sys.stdout.flush()
     #     time.sleep(0.2)
+
 # checkSteamVRInit()

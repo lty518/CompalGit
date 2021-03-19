@@ -21,11 +21,11 @@ import steamVRManager as svrm
 import systemSettings as sys
 import udp_client_listener as ucl
 # -----------------------------
-from checkInstalledGame import CheckInstalledGame
+import checkInstalledGame as ch
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.DEBUG)
-# GAME_ID
+# app_id
 TEAMVR_GAMEID = '250820'
 HELLBLADE = '747350'
 STEAMVR_ID = '250820'
@@ -39,10 +39,11 @@ CLOUDXR_CLIENT_IP = ''
 BACKEND_SERVER_IP = ''
 # FLAG
 is_available = True
-game_id = ''
-game_title = ''
+app_id = ''
+app_title = ''
 player_ip = ''
-list = ''
+platform = ''
+applist = list()
 # GlOBAL VARIABLES
 launch_time = time.time()
 g_CurrentGameID = ''
@@ -73,26 +74,37 @@ def timeoutCloudXR():
 def launchCloudXR():
     if request.method == 'POST':
         print('============launchCloudXR=============')
-        global player_ip, is_available, game_title
-        global game_id
+        global player_ip, is_available, app_title, platform
+        global app_id
         global BACKEND_SERVER_IP
         # if not is_available:
         #     return 'Game server not available now'
-        game_title = request.form.get('game_title', type=str)
-        game_id = request.form.get('game_id', type=str)
+        app_title = request.form.get('app_title', type=str)
+        app_id = request.form.get('app_id', type=str)
         player_ip = request.form.get('player_ip', type=str)
+        platform = request.form.get('platform', type = str)
 
-        svrm.setGameID(game_id)
-        svrm.setGameTitle(game_title)
-        # logging.info("request: {0} {1} {2}".format(game_title,  game_id, player_ip))
-        # Game_id needs to be generalized
+        svrm.setAppID(app_id)
+        svrm.setAppTitle(app_title)
+        print('platform: ', platform)
+        # logging.info("request: {0} {1} {2}".format(app_title,  app_id, player_ip))
+        # app_id needs to be generalized
         if svrm.CheckGameStatus(SteamVR) >= 1:
-            if is_available == True:
-                svrm.startGame(BACKEND_SERVER_IP, player_ip,
-                               game_id, game_title)
-            is_available = False
-            # bm.SendGameConnection(BACKEND_SERVER_IP,player_ip, game_id, "playing")
-            return {'launch success': True}
+            if platform == "steam" or platform == "compal":
+                if is_available == True:
+                    svrm.startGame(BACKEND_SERVER_IP, player_ip,
+                                app_id, app_title, platform)
+                is_available = False
+                # bm.SendGameConnection(BACKEND_SERVER_IP,player_ip, app_id, "playing")
+                return {'launch success': True}
+            # elif platform == "compal":
+            #     if is_available == True:
+            #         svrm.startApplication(app_title, app_id)
+            #     is_available = False
+            #     # bm.SendGameConnection(BACKEND_SERVER_IP,player_ip, app_id, "playing")
+            #     return {'launch success': True}
+            else:
+                return {'launch success': False}
         else:
             # TODO: open steamvr again and startGame
             # TODO: return false if error happen
@@ -107,29 +119,28 @@ def launchCloudXR():
 
 @app.route('/game-disconnection', methods=['POST'])
 def closeCloudXR():
-    global player_ip, is_available, game_id, game_title
+    global player_ip, is_available, app_id, app_title,platform
     # print(player_ip, request.remote_addr)
-    # game_title = request.form.get('game_title', type=str)
-    #game_id = request.form.get('game_id', type=str)
+    # app_title = request.form.get('app_title', type=str)
+    #app_id = request.form.get('app_id', type=str)
     # if request.remote_addr != player_ip and player_ip != '127.0.0.1':
     #     return 'Invalid request'
     # Close game app and steamVR, and reset game server status
-    print('closeCloudXR : ', svrm.getGameTitle())
-    logging.info(svrm.getGameTitle())
+    print('closeCloudXR : ', svrm.getAppTitle())
+    logging.info(svrm.getAppTitle())
     # if g_CurrentGameTitle == '':
-    #     return {'close fail': False, 'game_title' : game_title}
-    if svrm.CheckGameStatus(svrm.getGameTitle()) >= 1:
-        svrm.closeGame(svrm.getGameTitle())
+    #     return {'close fail': False, 'app_title' : app_title}
+    if svrm.CheckGameStatus(svrm.getAppTitle()) >= 1:
+        svrm.closeGame(svrm.getAppTitle())
         is_available = True
         print(player_ip, is_available)
-        bm.SendGameConnection(BACKEND_SERVER_IP, player_ip, game_id, "closed")
-        svrm.setGameID('')
+        bm.SendGameConnection(BACKEND_SERVER_IP, player_ip, app_id, "closed",platform)
+        svrm.setAppID('')
         player_ip = ''
         # RegisterToBackednServer()
-        return {'close success': True, 'game_title': game_title}
+        return {'close success': True, 'app_title': app_title}
     else:
-        return {'close success': False, 'game_title': game_title}
-
+        return {'close success': False, 'app_title': app_title}
 
 @app.route('/stream-info')
 def getStreamInfo():
@@ -146,18 +157,18 @@ def getSteamVRStatus():
 
 @app.route('/game-status', methods=['POST', 'GET'])
 def getGameStatus():
-    # game_id = request.form.get('game_id', type=str)
-    game_title = request.form.get('game_title', type=str)
-    if svrm.CheckGameStatus(game_title) >= 1:
-        return {'game_id Status': True, 'game_title': game_title}
+    # app_id = request.form.get('app_id', type=str)
+    app_title = request.form.get('app_title', type=str)
+    if svrm.CheckGameStatus(app_title) >= 1:
+        return {'app_id Status': True, 'app_title': app_title}
     else:
-        return {'game_id Status': False, 'game_title': game_title}
+        return {'app_id Status': False, 'app_title': app_title}
 
 
 @app.route('/reconnect_to_backend_server', methods=['POST', 'GET'])
 def reconnect_to_backend_server():
-    bm.RegisterToBackendServer(BACKEND_SERVER_IP, list)
-    return {'game_id Status': True}
+    bm.RegisterToBackendServer(BACKEND_SERVER_IP, applist)
+    return {'app_id Status': True}
 
 
 @app.route('/obs_start_streaming', methods=['POST', 'GET'])
@@ -187,18 +198,21 @@ def obs_stop_streaming():
 
 def main():
     global BACKEND_SERVER_IP
-    global list
+    global applist
     global settings
     # check installed steamvr games in pc
-    list = CheckInstalledGame()
-    # if list is empty
+    # applist = CheckInstalledGame()
+    ch.CheckInstalledSteamGame(applist)
+    ch.CheckInstalledNonSteamApplication(applist)
+    print(applist)
+    # if applist is empty
     # return
     # ucl.start_udp_server()
     settings = sys.loadConfig()
     # if sys not true return error
     BACKEND_SERVER_IP = settings['BACKEND_SERVER_IP']
     # register to backed server
-    bm.RegisterToBackendServer(BACKEND_SERVER_IP, list)
+    bm.RegisterToBackendServer(BACKEND_SERVER_IP, applist)
     # if fail to RegisterToBackednServer
 
     # then throw exceptions
@@ -232,7 +246,7 @@ if __name__ == '__main__':
     # send Heartbeat to backend
     if False:
         dict = {'BACKEND_SERVER_IP': settings['GAMESERVER_IP'], 'client_ip': 'client_ip',
-                'game_id': 'game_id', 'game_title': 'game_title'}
+                'app_id': 'app_id', 'app_title': 'app_title'}
         p = Process(target=bm.SendSystemHeartbeat, args=(dict,))
         p.start()
 
