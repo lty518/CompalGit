@@ -88,24 +88,26 @@ def launchCloudXR():
         svrm.setAppTitle(app_title)
         print('platform: ', platform)
         # logging.info("request: {0} {1} {2}".format(app_title,  app_id, player_ip))
-        # app_id needs to be generalized
+
         if svrm.CheckGameStatus(SteamVR) >= 1:
-            if platform == "steam" or platform == "compal":
+            # if platform == "steam" or platform == "compal":
+            if platform == "steam":
                 if is_available == True:
                     svrm.startGame(BACKEND_SERVER_IP, player_ip,
                                 app_id, app_title, platform)
                 is_available = False
-                # bm.SendGameConnection(BACKEND_SERVER_IP,player_ip, app_id, "playing")
                 return {'launch success': True}
-            # elif platform == "compal":
-            #     if is_available == True:
-            #         svrm.startApplication(app_title, app_id)
-            #     is_available = False
-            #     # bm.SendGameConnection(BACKEND_SERVER_IP,player_ip, app_id, "playing")
-            #     return {'launch success': True}
+            elif platform == "compal":
+                if is_available == True:
+                    svrm.startApplication(app_title, app_id)
+                is_available = False
+                return {'launch success': True}
             else:
                 return {'launch success': False}
         else:
+            svrm.startSteamvr(STEAMVR_ID)
+            while svrm.CheckGameStatus(SteamVR) == 0:
+                continue
             # TODO: open steamvr again and startGame
             # TODO: return false if error happen
             return {'launch success': False}
@@ -122,22 +124,50 @@ def closeCloudXR():
     global player_ip, is_available, app_id, app_title,platform
     # print(player_ip, request.remote_addr)
     # app_title = request.form.get('app_title', type=str)
-    #app_id = request.form.get('app_id', type=str)
+    # app_id = request.form.get('app_id', type=str)
     # if request.remote_addr != player_ip and player_ip != '127.0.0.1':
     #     return 'Invalid request'
+
     # Close game app and steamVR, and reset game server status
     print('closeCloudXR : ', svrm.getAppTitle())
     logging.info(svrm.getAppTitle())
     # if g_CurrentGameTitle == '':
     #     return {'close fail': False, 'app_title' : app_title}
     if svrm.CheckGameStatus(svrm.getAppTitle()) >= 1:
+        #close the current game
         svrm.closeGame(svrm.getAppTitle())
+        #close the steamvr
+        time.sleep(5)
+        svrm.closeSteamvr()
+        #close obs streaming
+        stream_server_ip = settings['STREAM_SERVER_IP']
+        obs.stop(BACKEND_SERVER_IP,stream_server_ip)
+        #set game server to be available again
         is_available = True
-        print(player_ip, is_available)
+        #print(player_ip, is_available)
+        time.sleep(5)
+        #restart steamvr
+        svrm.startSteamvr(STEAMVR_ID)
+        while svrm.CheckGameStatus(SteamVR) == 0:
+            continue
+        #send status to backend server
         bm.SendGameConnection(BACKEND_SERVER_IP, player_ip, app_id, "closed",platform)
         svrm.setAppID('')
         player_ip = ''
+
         # RegisterToBackednServer()
+        return {'close success': True, 'app_title': app_title}
+    elif svrm.CheckGameStatus(SteamVR) >= 1:
+        svrm.closeSteamvr()
+        bm.SendGameConnection(BACKEND_SERVER_IP, player_ip, app_id, "closed",platform)
+        svrm.setAppID('')
+        player_ip = ''
+        #add delay
+        time.sleep(5)
+        #restart steamvr
+        svrm.startSteamvr(STEAMVR_ID)
+        while svrm.CheckGameStatus(SteamVR) == 0:
+            continue
         return {'close success': True, 'app_title': app_title}
     else:
         return {'close success': False, 'app_title': app_title}
@@ -201,7 +231,6 @@ def main():
     global applist
     global settings
     # check installed steamvr games in pc
-    # applist = CheckInstalledGame()
     ch.CheckInstalledSteamGame(applist)
     ch.CheckInstalledNonSteamApplication(applist)
     print(applist)
