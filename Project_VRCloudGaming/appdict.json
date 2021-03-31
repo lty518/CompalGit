@@ -1,15 +1,5 @@
 [
     {
-        "ID": "1",
-        "Name": "Evernote",
-        "Address": "C:\\Users\\AlexTY_Liu\\AppData\\Local\\Programs\\Evernote\\Evernote.exe"
-    },
-    {
-        "ID": "2",
-        "Name": "Notepad++",
-        "Address": "C:\\Program Files\\Notepad++\\Notepad++.exe"
-    },
-    {
         "ID": "3",
         "Name": "AR_Beethoven3D",
         "Address": "C:\\Build\\AR_Beethoven3D.exe"
