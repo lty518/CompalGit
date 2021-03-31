@@ -5,7 +5,7 @@ import time
 
 from pynput import keyboard
 
-dest_ip = '172.16.0.3' #172.16.0.3
+dest_ip = '192.168.45.87' #172.16.0.3
 dest_port = int(8001)#54000 7890
 # 1. 建立套接字
 udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
