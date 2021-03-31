@@ -144,7 +144,7 @@ def closeGame(app_title):
 
 
 def closeSteamvr():
-    subprocess.Popen(r'Project_VRCloudGaming\close_steamvr.bat', shell=True)
+    subprocess.Popen(r'Project_VRCloudGaming\Script\close_steamvr.bat', shell=True)
 
 
 def setAppID(app_id):
