@@ -90,16 +90,10 @@ def launchCloudXR():
         # logging.info("request: {0} {1} {2}".format(app_title,  app_id, player_ip))
 
         if svrm.CheckGameStatus(SteamVR) >= 1:
-            # if platform == "steam" or platform == "compal":
-            if platform == "steam":
+            if platform == "steam" or platform == "compal":
                 if is_available == True:
                     svrm.startGame(BACKEND_SERVER_IP, player_ip,
                                 app_id, app_title, platform)
-                is_available = False
-                return {'launch success': True}
-            elif platform == "compal":
-                if is_available == True:
-                    svrm.startApplication(app_title, app_id)
                 is_available = False
                 return {'launch success': True}
             else:
