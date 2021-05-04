@@ -3,11 +3,14 @@ import atexit
 import glob
 import logging
 import os
-from multiprocessing import Process
+import subprocess
 import socket
 import sys
 import threading
 import time
+import json
+import requests
+from multiprocessing import Process
 from os import path
 from threading import Timer
 
@@ -49,7 +52,7 @@ launch_time = time.time()
 g_CurrentGameID = ''
 settings = ''
 
-
+#-----------------------Test Function-----------------------------------
 @app.route('/')
 def hello():
     return "<h1>Hello World!</h1>"
@@ -60,7 +63,10 @@ def index(text):
     print(text)
     return "<h1>%s</h1>" % text
 
-
+@app.route('/stream-info')
+def getStreamInfo():
+    return 'Under construction'
+#-----------------------------------------------------------------------
 @app.route('/connection-timeout', methods=['GET'])
 def timeoutCloudXR():
     svrm.timeoutOpenGame(BACKEND_SERVER_IP)
@@ -83,10 +89,12 @@ def launchCloudXR():
         app_id = request.form.get('app_id', type=str)
         player_ip = request.form.get('player_ip', type=str)
         platform = request.form.get('platform', type = str)
+        print('platform: ', platform)
 
         svrm.setAppID(app_id)
         svrm.setAppTitle(app_title)
-        print('platform: ', platform)
+        svrm.setAppPlatform(platform)
+
         # logging.info("request: {0} {1} {2}".format(app_title,  app_id, player_ip))
 
         if svrm.CheckGameStatus(SteamVR) >= 1:
@@ -107,6 +115,7 @@ def launchCloudXR():
             return {'launch success': False}
     # for launching steamVR process
     else:
+        #should return exception when packet is not POST
         if time.time() > launch_time+10:
             return {'status': True}
         else:
@@ -129,7 +138,13 @@ def closeCloudXR():
     #     return {'close fail': False, 'app_title' : app_title}
     if svrm.CheckGameStatus(svrm.getAppTitle()) >= 1:
         #close the current game
-        svrm.closeGame(svrm.getAppTitle())
+        cur_platform = svrm.getAppPlatform()
+        # print('cur_platform: ', cur_platform)
+        if cur_platform == 'steam':
+            svrm.closeGame(svrm.getAppTitle())
+        elif cur_platform =='compal':
+            print('svrm.getApplication: ', svrm.getApplication())
+            svrm.closeApplication(svrm.getAppTitle(), svrm.getApplication())
         #close the steamvr
         time.sleep(5)
         svrm.closeSteamvr()
@@ -166,11 +181,6 @@ def closeCloudXR():
     else:
         return {'close success': False, 'app_title': app_title}
 
-@app.route('/stream-info')
-def getStreamInfo():
-    return 'Under construction'
-
-
 @app.route('/steamvr-status', methods=['POST', 'GET'])
 def getSteamVRStatus():
     if svrm.CheckGameStatus(SteamVR) >= 1:
@@ -194,6 +204,31 @@ def reconnect_to_backend_server():
     bm.RegisterToBackendServer(BACKEND_SERVER_IP, applist)
     return {'app_id Status': True}
 
+@app.route('/start_droid_cam', methods=['POST', 'GET'])
+def start_droid_cam():
+    app_title = request.form.get('app_title', type=str)
+    app_type = request.form.get('app_type', type = str)
+    print('start_droid_cam app_title: ', app_title)
+    print('start_droid_cam app_type: ', app_type)
+    with open(os.path.relpath('Project_VRCloudGaming/appdict.json')) as f:
+        data = json.load(f)
+    for json_dict in data:
+        if json_dict['App'] == app_title:
+            svrm.setApplication(json_dict['Application'])
+            #request the ip
+            my_params = {
+                    'protocol': app_type,
+                    'app_name': app_title
+                    }
+            url = 'http://' + BACKEND_SERVER_IP + '/dataflow'
+            r = requests.get(url, params=my_params)
+            print("status_code: ", r.status_code)
+            json_data = json.loads(r.text)
+            # start camera
+            if json_data['status'] == True:
+                path = json_dict['DroidCam_Path']
+                subprocess.Popen([ path, '-c', json_data['source_url'], '4747', '-video'])
+    return json_data
 
 @app.route('/obs_start_streaming', methods=['POST', 'GET'])
 def obs_start_streaming():
@@ -206,8 +241,6 @@ def obs_start_streaming():
         'msg': 'TODO'
     }
     return dict
-
-
 
 @app.route('/obs_stop_streaming', methods=['POST', 'GET'])
 def obs_stop_streaming():
@@ -228,8 +261,8 @@ def main():
     ch.CheckInstalledSteamGame(applist)
     ch.CheckInstalledNonSteamApplication(applist)
     print(applist)
-    # if applist is empty
-    # return
+    if len(applist) == 0:
+        print('applist is empty')
     # ucl.start_udp_server()
     settings = sys.loadConfig()
     # if sys not true return error
