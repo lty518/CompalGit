@@ -3,6 +3,7 @@ import socket
 import requests
 from multiprocessing import Process
 
+#start obs and inform stream server
 def start(backend_server_ip, stream_server_ip, client_ip):
     local_ip = socket.gethostbyname(socket.gethostname())
     data = {
@@ -21,6 +22,7 @@ def start(backend_server_ip, stream_server_ip, client_ip):
     print('r.text : ', r.text)
     return True
 
+#close obs and inform stream server
 def stop(backend_server_ip, stream_server_ip):
     data = {'backend_server_ip': backend_server_ip}
     url = 'http://' + stream_server_ip + '/stop_streaming'
