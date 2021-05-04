@@ -11,6 +11,7 @@ import threading
 import logging
 import win32gui
 import json
+import requests
 from enum import Enum
 import backendManager as bm
 #
@@ -21,8 +22,7 @@ COMMAND_CLOSE = 'taskkill /F /FI "IMAGENAME eq {0}*"'
 g_CurrentAppTitle = ''
 logging.basicConfig(level=logging.DEBUG)
 loop = asyncio.get_event_loop()
-
-
+g_CurrentApplication =''
 class ServerState(Enum):
     #Initial state
     ServerState_NotRunning = 0
@@ -72,7 +72,7 @@ def openGame(dict):
             if platform == 'steam':
                 os.system(COMMAND_LAUNCH.format(app_id))
             elif platform == 'compal':
-                startApplication(app_title, app_id)
+                startApplication(app_title, app_id,BACKEND_SERVER_IP)
             while CheckGameStatus(app_title) == 0:
                 continue
             isGameOpened = True
@@ -117,13 +117,17 @@ def startGame(BACKEND_SERVER_IP, player_ip, app_id, app_title, platform):
     # p.join()
 
 
-def startApplication(app_title, app_id):
-    with open('Project_VRCloudGaming/appdict.json') as f:
+def startApplication(app_title, app_id, BACKEND_SERVER_IP):
+    global g_CurrentApplication
+    with open(os.path.relpath('Project_VRCloudGaming/appdict.json')) as f:
         data = json.load(f)
     for json_dict in data:
         if app_id == json_dict['ID']:
+            setApplication(json_dict['Application'])
             os.startfile(json_dict['Address'])
-            print(json_dict['Address'])
+            print('startApplication: ',json_dict['Address'])
+            print('startApplication: ', json_dict['Application'])
+            break
 
 
 def start_game_asyncio(BACKEND_SERVER_IP, player_ip, app_id):
@@ -142,28 +146,43 @@ def timeoutOpenGame(BACKEND_SERVER_IP):
 def closeGame(app_title):
     os.system(COMMAND_CLOSE.format(app_title))
 
+def closeApplication(app_title, app_application):
+    os.system(COMMAND_CLOSE.format(app_title))
+    print('close Application: ', app_application)
+    os.system(COMMAND_CLOSE.format(app_application))
 
 def closeSteamvr():
     subprocess.Popen(r'Project_VRCloudGaming\Script\close_steamvr.bat', shell=True)
-
 
 def setAppID(app_id):
     global g_CurrentAppID
     g_CurrentAppID = app_id
 
-
 def getAppID():
     return g_CurrentAppID
-
 
 def setAppTitle(app_title):
     global g_CurrentAppTitle
     g_CurrentAppTitle = app_title
 
-
 def getAppTitle():
     return g_CurrentAppTitle
 
+def setAppPlatform(app_platform):
+    global g_CurrentAppPlatform
+    g_CurrentAppPlatform = app_platform
+
+def getAppPlatform():
+    global g_CurrentAppPlatform
+    return g_CurrentAppPlatform
+
+def setApplication(application):
+    global g_CurrentApplication
+    g_CurrentApplication = application
+    print('setApplication: ', g_CurrentApplication)
+
+def getApplication():
+    return g_CurrentApplication
 
 def checkSteamVRInit():
     result = openvr.checkInitError(openvr.VRApplication_Background)
