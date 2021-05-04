@@ -52,28 +52,12 @@ launch_time = time.time()
 g_CurrentGameID = ''
 settings = ''
 
-#-----------------------Test Function-----------------------------------
-@app.route('/')
-def hello():
-    return "<h1>Hello World!</h1>"
-
-
-@app.route("/hello/<text>")
-def index(text):
-    print(text)
-    return "<h1>%s</h1>" % text
-
-@app.route('/stream-info')
-def getStreamInfo():
-    return 'Under construction'
-#-----------------------------------------------------------------------
 @app.route('/connection-timeout', methods=['GET'])
 def timeoutCloudXR():
     svrm.timeoutOpenGame(BACKEND_SERVER_IP)
     global is_available
     is_available = True
     print("timeoutCloudXR")
-
 
 # check if steamvr is ok and return ready for a user to connect
 @app.route('/game-connection', methods=['POST', 'GET'])
@@ -120,7 +104,6 @@ def launchCloudXR():
             return {'status': True}
         else:
             return {'status': False}
-
 
 @app.route('/game-disconnection', methods=['POST'])
 def closeCloudXR():
@@ -197,7 +180,6 @@ def getGameStatus():
         return {'app_id Status': True, 'app_title': app_title}
     else:
         return {'app_id Status': False, 'app_title': app_title}
-
 
 @app.route('/reconnect_to_backend_server', methods=['POST', 'GET'])
 def reconnect_to_backend_server():
