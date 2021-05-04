@@ -1,10 +1,10 @@
 import subprocess
 import os
 
-global proc
+proc = ''
 dir_path = os.path.dirname(os.path.realpath(__file__))
 def start_udp_server():
-    # global proc
+    global proc
     proc = subprocess.Popen([dir_path+'/vJoyClient'])
     #if success:
         #return success
