@@ -1,7 +1,12 @@
 [
     {
         "ID": "3",
+        "App": "Beethoven",
         "Name": "AR_Beethoven3D",
-        "Address": "C:\\Build\\AR_Beethoven3D.exe"
+        "Address": "C:\\Build\\AR_Beethoven3D.exe",
+        "Application": "DroidCamApp.exe",
+        "DroidCam_Path": "C:\\Program Files (x86)\\DroidCam\\DroidCamApp.exe",
+        "IP": "172.16.0.54",
+        "Port" : "4747"
     }
 ]
