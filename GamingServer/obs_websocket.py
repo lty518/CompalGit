@@ -16,7 +16,7 @@ def start(backend_server_ip, stream_server_ip, client_ip):
     r = requests.post(url, data=data)
 
     subprocess.Popen(
-        r'Project_VRCloudGaming\Script\obs_start_streaming.bat',
+        r'GamingServer\Script\obs_start_streaming.bat',
         shell=True)
     print('r.url :', r.url)
     print('r.text : ', r.text)
@@ -28,6 +28,6 @@ def stop(backend_server_ip, stream_server_ip):
     url = 'http://' + stream_server_ip + '/stop_streaming'
     requests.post(url, data=data)
     subprocess.Popen(
-        r'Project_VRCloudGaming\Script\obs_stop_streaming.bat',
+        r'GamingServer\Script\obs_stop_streaming.bat',
         shell=True)
     return True

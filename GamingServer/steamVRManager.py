@@ -46,7 +46,7 @@ def enumHandler(hwnd, lParam):
             # win32gui.MoveWindow(hwnd, 0, 0, 760, 500, True)
             win32gui.SetForegroundWindow(hwnd)
 
-
+#check if the application is running
 def CheckGameStatus(imagename):
     imagename = imagename + ".exe"
     # p = os.popen('tasklist /FI "IMAGENAME eq %s"' % imagename)
@@ -69,6 +69,7 @@ def openGame(dict):
     isGameOpened = False
     while time.time() < mustend:
         if checkSteamVRInit() == 0:  #CloudXR Connect Success
+            #check if the application is a steamvr software or other application
             if platform == 'steam':
                 os.system(COMMAND_LAUNCH.format(app_id))
             elif platform == 'compal':
@@ -86,11 +87,13 @@ def openGame(dict):
             print("wait for connecting : ", time_count)
             time.sleep(period)
     if isGameOpened == True:
+        #if game is open, send message to backend server
         print("playing")
         bm.SendGameConnection(BACKEND_SERVER_IP, player_ip, app_id, "playing",
                               platform)
     else:
         print("timeout")
+        #if game is not open, send timeout message to backend server
         bm.SendGameConnection(BACKEND_SERVER_IP, player_ip, app_id, "timeout",
                               platform)
     return True
@@ -119,7 +122,7 @@ def startGame(BACKEND_SERVER_IP, player_ip, app_id, app_title, platform):
 
 def startApplication(app_title, app_id, BACKEND_SERVER_IP):
     global g_CurrentApplication
-    with open(os.path.relpath('Project_VRCloudGaming/appdict.json')) as f:
+    with open(os.path.relpath('GamingServer/appdict.json')) as f:
         data = json.load(f)
     for json_dict in data:
         if app_id == json_dict['ID']:
@@ -128,13 +131,6 @@ def startApplication(app_title, app_id, BACKEND_SERVER_IP):
             print('startApplication: ',json_dict['Address'])
             print('startApplication: ', json_dict['Application'])
             break
-
-
-def start_game_asyncio(BACKEND_SERVER_IP, player_ip, app_id):
-    # dict = {'BACKEND_SERVER_IP' : BACKEND_SERVER_IP, 'player_ip': player_ip,
-    # 'app_id': app_id}
-    print("start_game_asyncio")
-
 
 def timeoutOpenGame(BACKEND_SERVER_IP):
     global p
@@ -152,7 +148,7 @@ def closeApplication(app_title, app_application):
     os.system(COMMAND_CLOSE.format(app_application))
 
 def closeSteamvr():
-    subprocess.Popen(r'Project_VRCloudGaming\Script\close_steamvr.bat', shell=True)
+    subprocess.Popen(r'GamingServer\Script\close_steamvr.bat', shell=True)
 
 def setAppID(app_id):
     global g_CurrentAppID

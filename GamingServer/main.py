@@ -192,7 +192,7 @@ def start_droid_cam():
     app_type = request.form.get('app_type', type = str)
     print('start_droid_cam app_title: ', app_title)
     print('start_droid_cam app_type: ', app_type)
-    with open(os.path.relpath('Project_VRCloudGaming/appdict.json')) as f:
+    with open(os.path.relpath('GamingServer/appdict.json')) as f:
         data = json.load(f)
     for json_dict in data:
         if json_dict['App'] == app_title:
@@ -273,7 +273,7 @@ def main():
     # loop
 
 
-if __name__ == '__main__':
+if __name__ == '__main__': 
     # set host='0.0.0.0', port=80 to enable external access in local network
     # app.debug = True
     # app.use_reloader=False

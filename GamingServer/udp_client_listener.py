@@ -10,7 +10,7 @@ def start_udp_server():
         #return success
     #else:
         #return error
-    # os.system("Project_VRCloudGaming/UDPReceiver")
+    # os.system("GamingServer/UDPReceiver")
 def stop_udp_server():
     global proc
     proc.terminate()

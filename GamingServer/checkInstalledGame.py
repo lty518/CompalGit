@@ -15,7 +15,7 @@ type = '.acf'
 
 # Check the current installed non Steam application
 def CheckInstalledNonSteamApplication(applist):
-    with open('Project_VRCloudGaming/appdict.json') as f:
+    with open('GamingServer/appdict.json') as f:
         data = json.load(f)
     for json_dict in data:
         if os.path.exists(json_dict['Address']):
