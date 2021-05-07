@@ -26,9 +26,10 @@
 1. 安裝vJoy，[官網](https://sourceforge.net/projects/vjoystick/ "vjoy官網")
 2. 設定Config vJoy (依照SendKeyboardSignal 會用到的Buttons數量修改)，並點選啟動
 3. 下載x360ce，首次運行程式會提示你去安裝xinput的dll，點選create讓他去跑
-4. 設定x360ce按鍵配置，依照vJoy Receiver的訊號，設定控制器的每個按鈕要對應哪個訊號
-1. 執行vJoyClient.exe
-2. 執行x360ce (縮小視窗在背景運行可以減少資源消耗)
+![Hint](https://truth.bahamut.com.tw/s01/201602/a70f4d24f287c24ba13524b82aca3920.PNG?w=1000)
+4. 設定x360ce按鍵配置，依照vJoy Receiver的訊號，設定控制器的每個按鈕要對應哪個訊號 [教學](https://forum.gamer.com.tw/C.php?bsn=173&snA=10325)
+5. 執行vJoyClient.exe
+6. 執行x360ce (縮小視窗在背景運行可以減少資源消耗)
 
 #備註
 1. 在執行SteamVR時，如果遇到滑鼠鍵盤不正常動作時(卡鍵)，把x360ce關掉試試看，通常是原因
