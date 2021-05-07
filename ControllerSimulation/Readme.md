@@ -17,7 +17,7 @@
 3. 安裝相關套件(系統提示缺少什麼就用pip 安裝)
 
 ## vJoyClient 開發(C++)
-1. 去vJoy官網下載 Feeder [範例專案](http://vjoystick.sourceforge.net/site/index.php/dev216/system-architecture/81-news/87-writing-a-feeder-application2)
+1. 去vJoy官網下載最新的 Feeder SDK [Download](https://sourceforge.net/projects/vjoystick/files/Beta%202.x/SDK/)[教學](http://vjoystick.sourceforge.net/site/index.php/dev216/system-architecture/81-news/87-writing-a-feeder-application2) []
 2. 用VS開一個新專案
 3. Build
 4. Run
