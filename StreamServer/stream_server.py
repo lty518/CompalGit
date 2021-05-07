@@ -11,11 +11,6 @@ stream_id = ''
 app = Flask(__name__)
 
 
-@app.route('/')
-def index():
-    return 'hello man'
-
-
 @app.route('/StartNginX', methods=['POST'])
 def StartNginX():
     print("StartNginX")
@@ -65,7 +60,7 @@ def start_streaming():
         'video_source_url': "/tmp_hls/stream/index.m3u8"
     }
     url = 'http://' + backend_server_ip + '/streaming'
-    print (url)
+    print(url)
     r = requests.post(url, data=data).json()
     # print('status: ', r['status'])
     # print('msg: ',r['msg'])
@@ -83,8 +78,8 @@ def start_streaming():
 def stop_streaming():
     backend_server_ip = request.form.get('backend_server_ip', type=str)
     global stream_id
-    print('stop streaming: ',stream_id)
-    url = 'http://' + backend_server_ip + '/streaming/'+str(stream_id)
+    print('stop streaming: ', stream_id)
+    url = 'http://' + backend_server_ip + '/streaming/' + str(stream_id)
     requests.delete(url)
     print("stop streaming session")
     # send request to backend
