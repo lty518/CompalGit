@@ -35,9 +35,10 @@ def checkInitError(eApplicationType, pStartupInfo=None):
 
 
 # 運行Gaming Server
-兩種方法
-1. 執行 start_gameserver.bat (目前會遇到需要把checkInstalledGame.py ln18的GamingServer/拿掉才抓的到路徑，待修)
-2. 透過python 執行main.py
+1. 首先必須先確保Backend Server是打開的
+2. 接下來有兩種方法
+    a. 執行 start_gameserver.bat (目前會遇到需要把checkInstalledGame.py ln18的GamingServer/拿掉才抓的到路徑，待修)
+    b. 透過python 執行main.py
 
 
 
